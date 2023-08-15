@@ -2,6 +2,15 @@
 
 A simple SCIM server for testing/monitoring purposes
 
+## Installation
+```
+$ git clone https://github.com/SURFscz/SCIM-server.git
+$ cd SCIM-server
+$ virtualenv venv
+$ . venv/bin/activate
+$ pip install -r requirements.txt
+```
+
 ## Usage
 ```
 usage: server.py [-h] [--host HOST] [--port PORT] [--mongo_db MONGO_DB] [--db_url DB_URL] [--data_path DATA_PATH] [--api-key API_KEY]
