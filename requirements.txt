@@ -1,0 +1,5 @@
+uvicorn
+fastapi
+scim2_filter_parser
+sqlalchemy
+pymongo
