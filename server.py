@@ -6,6 +6,8 @@ from fastapi import Depends, Request, FastAPI, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from contextlib import asynccontextmanager
+
 from routers import BASE_PATH, config, resource, schema, users, groups
 from utils.auth import api_key_auth
 from utils import host, port
@@ -18,7 +20,18 @@ level = logging.INFO \
 logging.basicConfig(level=level)
 logger = logging.getLogger(__name__)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Why is this here in the first place?
+    pass
+    yield
+    pass
+
+app = FastAPI(lifespan=lifespan)
+
 app = FastAPI(
+    lifespan=lifespan,
     title="SCIM Sample",
     docs_url=BASE_PATH if BASE_PATH.startswith('/') else '/',
     redoc_url=None,
@@ -36,16 +49,6 @@ app.include_router(resource.router)
 app.include_router(schema.router)
 app.include_router(users.router)
 app.include_router(groups.router)
-
-
-@app.on_event("startup")
-def startup():
-    pass
-
-
-@app.on_event("shutdown")
-def shutdown():
-    pass
 
 
 @app.exception_handler(RequestValidationError)

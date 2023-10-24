@@ -14,7 +14,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
-    prefix=BASE_PATH+"/Users",
+    prefix=BASE_PATH + "/Users",
     tags=["SCIM Users"],
 )
 
@@ -32,7 +32,7 @@ async def get_all_users(
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_user(
     user: User = Body(
-        example={
+        examples={
             "externalId": "string",
             "active": True,
             "name": {

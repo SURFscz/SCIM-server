@@ -15,7 +15,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
-    prefix=BASE_PATH+"/Groups",
+    prefix=BASE_PATH + "/Groups",
     tags=["SCIM Groups"],
 )
 
@@ -33,7 +33,7 @@ async def get_all_groups(
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def create_group(
     group: Group = Body(
-        example={
+        examples={
             "displayName": "Student",
             "externalId": "273aca56-d86a-4f05-a159-51856b5cb1b3@sram.surf.nl",
             "members": [
