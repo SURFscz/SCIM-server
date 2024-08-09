@@ -1,18 +1,37 @@
 # schema.py
 
 from datetime import datetime
-from typing import ClassVar, Union, List, Optional, Dict
+
+from typing import Union, List, Optional, Dict, Literal, Any
+
 from pydantic import BaseModel, Field
 
 CORE_SCHEMA = "urn:ietf:params:scim:schemas:core:2.0"
-CORE_SCHEMA_USER = CORE_SCHEMA + ":User"
-CORE_SCHEMA_GROUP = CORE_SCHEMA + ":Group"
+CORE_SCHEMA_USER = CORE_SCHEMA+":User"
+CORE_SCHEMA_GROUP = CORE_SCHEMA+":Group"
 
 SRAM_SCHEMA = "urn:mace:surf.nl:sram:scim:extension"
-SRAM_SCHEMA_USER = SRAM_SCHEMA + ":User"
-SRAM_SCHEMA_GROUP = SRAM_SCHEMA + ":Group"
+SRAM_SCHEMA_USER = SRAM_SCHEMA+":User"
+SRAM_SCHEMA_GROUP = SRAM_SCHEMA+":Group"
 
 SCIM_API_MESSAGES = "urn:ietf:params:scim:api:messages:2.0"
+
+SCIM_CONTENT_TYPE = 'application/scim+json'
+
+
+class HealthCheck(BaseModel):
+    status: str = "OK"
+
+
+class Operation(BaseModel):
+    op: Literal["add", "remove", "replace"]
+    path: str
+    value: Optional[Any] = None
+
+
+class Patch(BaseModel):
+    schemas: List[str]
+    operations: List[Operation]
 
 
 class Name(BaseModel):
@@ -26,8 +45,13 @@ class Email(BaseModel):
 
 
 class Member(BaseModel):
-    ref: ClassVar[str] = Field(alias="$ref")
-    display: str
+    ref: Optional[str] = Field(alias="$ref", default=None)
+    display: Optional[str] = None
+    value: str
+
+
+class Link(BaseModel):
+    name: str
     value: str
 
 
@@ -36,9 +60,9 @@ class Certificate(BaseModel):
 
 
 class Meta(BaseModel):
-    created: datetime = Field(default_factory=datetime.utcnow)
-    lastModified: datetime = Field(default_factory=datetime.utcnow)
-    location: str
+    created: datetime = Field(default_factory=datetime.now)
+    lastModified: datetime = Field(default_factory=datetime.now)
+    location: Optional[str] = None
     resourceType: str
 
 
@@ -56,17 +80,18 @@ class SRAM_User_Extension(BaseModel):
     voPersonExternalAffiliation: Optional[str] = None
     voPersonExternalId: Optional[str] = None
 
-    class Config:
-        title = "SRAM User Extension"
+#   class Config:
+#       title = "SRAM User Extension"
 
 
 class SRAM_Group_Extension(BaseModel):
     description: Optional[str]
     labels: Optional[List[str]]
     urn: Optional[str]
+    links: Optional[List[Union[Link, None]]]
 
-    class Config:
-        title = "SRAM Group Extension"
+#   class Config:
+#       title = "SRAM Group Extension"
 
 
 class User(BaseModel):
@@ -86,14 +111,14 @@ class UserResource(User):
     id: str
     meta: Meta
 
-    class Config:
-        title = "User"
+#   class Config:
+#       title = "User"
 
 
 class Group(BaseModel):
     displayName: str
     externalId: Optional[str] = None
-    members: Optional[List[Union[Member, None]]] = None
+    members: Optional[List[Union[Member, None]]] = []
     sram_group_extension: Optional[SRAM_Group_Extension] = \
         Field(alias=SRAM_SCHEMA_GROUP, default=None)
     schemas: List[Union[str, None]] = None
@@ -103,8 +128,8 @@ class GroupResource(Group):
     id: str
     meta: Meta
 
-    class Config:
-        title = "Group"
+#   class Config:
+#       title = "Group"
 
 
 class SchemaExtension(BaseModel):
