@@ -1,5 +1,6 @@
+starlette
 uvicorn
-fastapi
+fastapi>=0.108
 scim2_filter_parser
 sqlalchemy
 pymongo

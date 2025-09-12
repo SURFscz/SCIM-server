@@ -1,23 +1,26 @@
 #!/usr/bin/env python
+import json
 
 import uvicorn
 
-from fastapi import Depends, Request, FastAPI, status
+from fastapi import Depends, Request, Response, FastAPI, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from contextlib import asynccontextmanager
+from starlette.background import BackgroundTask
 
 from routers import BASE_PATH, config, resource, schema, users, groups
 from utils.auth import api_key_auth
 from utils import host, port
 
 import os
+import sys
 import logging
 
-level = logging.INFO \
-    if os.environ.get('LOGLEVEL', 'INFO') == 'INFO' else logging.ERROR
-logging.basicConfig(level=level)
+logging.basicConfig(
+    level=os.environ.get('LOGLEVEL', 'INFO').upper()
+)
 logger = logging.getLogger(__name__)
 
 
@@ -27,6 +30,7 @@ async def lifespan(app: FastAPI):
     pass
     yield
     pass
+
 
 app = FastAPI(lifespan=lifespan)
 
@@ -63,6 +67,27 @@ async def validation_exception_handler(
         content=content,
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
     )
+
+
+def log_info(req_body, res_body):
+    logging.debug("request: {}".format(json.dumps(req_body)))
+    logging.debug("response: {}".format(json.dumps(res_body)))
+
+
+@app.middleware('http')
+async def some_middleware(request: Request, call_next):
+    req_body = await request.body()
+    response = await call_next(request)
+
+    chunks = []
+    async for chunk in response.body_iterator:
+        chunks.append(chunk)
+    res_body = b''.join(chunks)
+
+    task = BackgroundTask(log_info, req_body, res_body)
+    return Response(content=res_body, status_code=response.status_code,
+                    headers=dict(response.headers), media_type=response.media_type, background=task)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host=host, port=port)
