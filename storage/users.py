@@ -68,10 +68,7 @@ def put_user_resource(id: str, user: User) -> UserResource:
     resource.sram_user_extension = user.sram_user_extension
     resource.x509Certificates = user.x509Certificates
     resource.meta.lastModified = datetime.now()
-    resource.schemas = [
-        CORE_SCHEMA_USER,
-        SRAM_SCHEMA_USER
-    ]
+    resource.schemas = user.schemas
 
     Users[id] = resource.model_dump_json(by_alias=True, exclude_none=True)
 

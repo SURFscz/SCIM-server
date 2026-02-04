@@ -66,10 +66,7 @@ def put_group_resource(id: str, group: Group) -> GroupResource:
     resource.members = group.members
     resource.sram_group_extension = group.sram_group_extension
     resource.meta.lastModified = datetime.now()
-    resource.schemas = [
-        CORE_SCHEMA_GROUP,
-        SRAM_SCHEMA_GROUP
-    ]
+    resource.schemas = group.schemas
 
     Groups[id] = resource.model_dump_json(by_alias=True, exclude_none=True)
 
